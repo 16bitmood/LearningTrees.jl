@@ -7,8 +7,7 @@ mutable struct RandomForest <: Classifier
 end
 
 RandomForest(;ntrees = 20, criterion = gini) = begin
-    attrfilter(attrs) = sample(attrs, Int(ceil(1 + log(2, length(attrs)))), replace = false)
-    RandomForest(nothing, nothing, ntrees, criterion, attrfilter)
+    RandomForest(nothing, nothing, ntrees, criterion, nothing)
 end
 
 fit!(rf::RandomForest, df::DataFrame, topredict) = begin
@@ -16,6 +15,9 @@ fit!(rf::RandomForest, df::DataFrame, topredict) = begin
 
     dfrows = [sample(1:nrow(df), nrow(df), replace = true) for i = 1:rf.ntrees]
     dfs = map(rows -> df[rows, :], dfrows)
+
+    m = Int(ceil(1 + sqrt(size(df, 2) - 1)))
+    rf.attrfilter = attrs -> sample(attrs, min(m, length(attrs)), replace = false)
 
     trees = Dict()
     Threads.@threads for i = 1:rf.ntrees
