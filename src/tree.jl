@@ -54,7 +54,7 @@ Node(df, attributes, depth, clf) = begin
     end
 
     minimp, mincurrent, minsplit = Inf, nothing, nothing
-    for current in attributes
+    for current in clf.attrfilter(attributes)
         imp, split = impurity(df, current, clf)
         if imp <= minimp
             minimp, mincurrent, minsplit = imp, current, split
